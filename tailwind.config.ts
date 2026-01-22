@@ -43,6 +43,14 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        agendamento: {
+          DEFAULT: "hsl(var(--agendamento))",
+          foreground: "hsl(var(--agendamento-foreground))",
+        },
+        indicacao: {
+          DEFAULT: "hsl(var(--indicacao))",
+          foreground: "hsl(var(--indicacao-foreground))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
