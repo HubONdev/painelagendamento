@@ -1,17 +1,60 @@
-import { LastConversion } from "@/components/LastConversion";
+import { LastConversion, ConversionData } from "@/components/LastConversion";
 import { OperatorRanking } from "@/components/OperatorRanking";
 import { ActivityLog } from "@/components/ActivityLog";
 import { useEffect, useState } from "react";
 import logoPpm from "@/assets/logo-ppm.png";
 
+// Demo data for simulating new conversions
+const demoConversions: ConversionData[] = [
+  {
+    title: "Consulta Agendada - Dr. Roberto Silva",
+    responsible: "Ana Paula Santos",
+    pipeline: "Indicação Premium",
+    pipelineType: "indicacao",
+    time: "14:32",
+  },
+  {
+    title: "Exame Marcado - Clínica Central",
+    responsible: "Carlos Oliveira",
+    pipeline: "Agendamento Direto",
+    pipelineType: "agendamento",
+    time: "14:35",
+  },
+  {
+    title: "Retorno Confirmado - Dra. Marina Costa",
+    responsible: "Mariana Costa",
+    pipeline: "Indicação VIP",
+    pipelineType: "indicacao",
+    time: "14:38",
+  },
+];
+
 const Index = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [conversionIndex, setConversionIndex] = useState(0);
+  const [currentConversion, setCurrentConversion] = useState<ConversionData>(demoConversions[0]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Demo: Simulate new conversion every 15 seconds (for testing celebration)
+  useEffect(() => {
+    const demoTimer = setInterval(() => {
+      setConversionIndex(prev => {
+        const nextIndex = (prev + 1) % demoConversions.length;
+        const newConversion = {
+          ...demoConversions[nextIndex],
+          time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        };
+        setCurrentConversion(newConversion);
+        return nextIndex;
+      });
+    }, 15000);
+    return () => clearInterval(demoTimer);
   }, []);
 
   return (
@@ -61,7 +104,7 @@ const Index = () => {
       <main className="relative z-10 flex h-[calc(100%-65px)]">
         {/* Left Side - 60% - Last Conversion */}
         <section className="w-[60%] border-r border-border/20">
-          <LastConversion />
+          <LastConversion data={currentConversion} />
         </section>
 
         {/* Right Side - 40% - Ranking + Log */}

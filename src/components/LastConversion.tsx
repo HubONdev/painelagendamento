@@ -1,5 +1,7 @@
 import { User, GitBranch, Clock, Flame } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useCelebration } from "@/hooks/useCelebration";
+import { useNotificationSound } from "@/hooks/useNotificationSound";
 
 export type PipelineType = 'agendamento' | 'indicacao';
 
@@ -13,6 +15,7 @@ export interface ConversionData {
 
 interface LastConversionProps {
   data?: ConversionData;
+  onNewConversion?: () => void;
 }
 
 const defaultConversion: ConversionData = {
@@ -23,21 +26,39 @@ const defaultConversion: ConversionData = {
   time: "14:32",
 };
 
-export function LastConversion({ data = defaultConversion }: LastConversionProps) {
+export function LastConversion({ data = defaultConversion, onNewConversion }: LastConversionProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [animateEntry, setAnimateEntry] = useState(false);
+  const { celebrate } = useCelebration();
+  const { playNotificationSound } = useNotificationSound();
+  const isFirstRender = useRef(true);
+  const previousDataRef = useRef<string>("");
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   useEffect(() => {
-    if (data) {
+    const dataKey = `${data?.title}-${data?.time}`;
+    
+    // Skip celebration on first render
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      previousDataRef.current = dataKey;
+      return;
+    }
+
+    // Only celebrate if data actually changed
+    if (dataKey !== previousDataRef.current) {
+      previousDataRef.current = dataKey;
       setAnimateEntry(true);
+      celebrate();
+      playNotificationSound();
+      onNewConversion?.();
       const timer = setTimeout(() => setAnimateEntry(false), 800);
       return () => clearTimeout(timer);
     }
-  }, [data?.title, data?.time]);
+  }, [data?.title, data?.time, celebrate, playNotificationSound, onNewConversion]);
 
   const isAgendamento = data.pipelineType === 'agendamento';
   const pipelineGradient = isAgendamento ? 'bg-gradient-agendamento' : 'bg-gradient-indicacao';
